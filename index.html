@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNAR HOWL • The Pack Awakens</title>
+    <style>
+
+        :root {
+            --bg: #0b0f14;
+            --accent-purple: #9d00ff;
+            --accent-blue: #00f0ff;
+            --text: #f0f0f5;
+            --card: #12171f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+                    /* === ADD / REPLACE THESE RULES IN YOUR <style> TAG === */
+
+/* 1. Make body fully transparent so the portal is always behind everything */
+body {
+    background: transparent !important;
+}
+
+/* 2. Hero becomes a glass layer — rings shine through */
+#hero {
+    background: transparent;
+    position: relative;
+}
+#hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 15, 20, 0.68);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* 3. All sections now glassmorphic — rings + sparks subtly visible behind */
+section {
+    background: transparent !important;
+}
+
+/* 4. Cards & panels get premium glass + soft purple border so rings glow through */
+.feature-card,
+.nft-card,
+.faq-item,
+.phase-content,
+.reveal-card,
+.modal-content {
+    background: rgba(18, 23, 31, 0.88) !important;
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(157, 0, 255, 0.18);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        inset 0 0 40px rgba(106, 0, 255, 0.08);
+}
+
+/* 5. Roadmap timeline line stays visible but lets rings peek */
+.roadmap-timeline::before {
+    background: linear-gradient(to bottom, transparent, rgba(157, 0, 255, 0.25), transparent);
+}
+
+/* 6. Footer glass */
+footer {
+    background: rgba(10, 13, 18, 0.92) !important;
+    backdrop-filter: blur(20px);
+}
+
+/* 7. Navigation already has blur — we just boost it slightly */
+nav {
+    background: rgba(11, 15, 20, 0.92) !important;
+    backdrop-filter: blur(24px);
+}
+
+/* 8. Make sure preloader stays 100% opaque on top */
+#preloader {
+    background: #0a0a0a;
+    z-index: 99999;
+}
+
+/* 9. Optional: subtle vignette so center rings pop more */
+#portal-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(10, 10, 20, 0.45) 78%);
+    pointer-events: none;
+    z-index: 2;
+
+}
+        /* === ADD THIS CSS TO YOUR <style> TAG (anywhere inside) === */
+
+#portal-background {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background: radial-gradient(circle at 50% 50%, #2a0044 0%, #0f001f 42%, #0a0a0a 72%, #000000 100%);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.rings-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(88vmin, 720px);
+    height: min(88vmin, 720px);
+    transform: translate(-50%, -50%);
+}
+
+.ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    border: 4px solid #6a00ff;
+    box-shadow: 
+        0 0 45px #6a00ff,
+        0 0 95px #6a00ff,
+        0 0 160px rgba(106, 0, 255, 0.65),
+        inset 0 0 35px rgba(106, 0, 255, 0.4);
+    filter: blur(1.5px);
+    transform: translate(-50%, -50%);
+    opacity: 0.92;
+}
+
+.outer {
+    width: 100%;
+    height: 100%;
+    animation: rotate-slow 48s linear infinite;
+}
+
+.inner {
+    width: 61%;
+    height: 61%;
+    animation: rotate-fast 21s linear infinite reverse;
+    box-shadow: 
+        0 0 38px #6a00ff,
+        0 0 82px #6a00ff,
+        0 0 135px rgba(106, 0, 255, 0.75);
+}
+
+@keyframes rotate-slow {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes rotate-fast {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+#spark-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    mix-blend-mode: screen;
+    opacity: 0.82;
+}
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-purple);
+            border-radius: 20px;
+            box-shadow: 0 0 15px var(--accent-purple);
+        }
+
+/* ==================== CINEMATIC HORROR PRELOADER ==================== */
+#preloader {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: opacity 1.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fog {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(139, 0, 0, 0.25) 0%, transparent 60%),
+        radial-gradient(circle at 80% 70%, rgba(80, 0, 0, 0.18) 0%, transparent 70%),
+        radial-gradient(circle at 40% 80%, rgba(139, 0, 0, 0.22) 0%, transparent 65%);
+    animation: fog-drift 28s linear infinite;
+    opacity: 0.65;
+    filter: blur(4px);
+    pointer-events: none;
+}
+
+@keyframes fog-drift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(80px, -60px); }
+}
+
+canvas#particles {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.75;
+}
+
+#loading-phase {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+    max-width: 620px;
+    padding: 0 20px;
+}
+
+#logo-text {
+    font-size: clamp(3.2rem, 9vw, 8.5rem);
+    font-weight: 900;
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #8B0000, #c80000, #8B0000);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 40px #8B0000, 0 0 80px #c80000, 0 0 120px #4a0000;
+    animation: horror-flicker 1.8s infinite alternate, glow-crimson 4s ease-in-out infinite;
+}
+
+@keyframes horror-flicker {
+    0%, 100% { opacity: 1; transform: translateY(0); }
+    42% { opacity: 0.92; }
+    67% { opacity: 0.97; transform: translateY(-3px); }
+    89% { opacity: 0.89; }
+}
+
+@keyframes glow-crimson {
+    0% { filter: drop-shadow(0 0 30px #8B0000); }
+    100% { filter: drop-shadow(0 0 80px #c80000); }
+}
+
+.tagline {
+    margin-top: 1.2rem;
+    font-size: clamp(1.1rem, 3.5vw, 1.65rem);
+    letter-spacing: 0.35em;
+    color: #4a0000;
+    text-shadow: 0 0 20px #8B0000;
+    opacity: 0;
+    animation: fadeInTag 2s ease 0.6s forwards;
+}
+
+#percent {
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
+    font-weight: 900;
+    color: #c80000;
+    text-shadow: 0 0 60px #8B0000;
+    margin: 2.5rem 0 1rem;
+    letter-spacing: -0.04em;
+}
+
+.progress-container {
+    width: 420px;
+    max-width: 82vw;
+    height: 3px;
+    background: rgba(139, 0, 0, 0.18);
+    border-radius: 9999px;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.4);
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #8B0000, #ff1a1a);
+    box-shadow: 0 0 30px #c80000;
+    transition: width 0.08s linear;
+}
+
+/* NFT Reveal */
+#nft-reveal {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 10, 10, 0.96);
+    opacity: 0;
+    transition: opacity 1.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-card {
+    background: rgba(20, 18, 18, 0.65);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(139, 0, 0, 0.35);
+    border-radius: 32px;
+    padding: 18px;
+    box-shadow: 0 0 60px rgba(139, 0, 0, 0.6), 0 0 120px rgba(200, 0, 0, 0.25);
+    max-width: 92vw;
+    width: 420px;
+    transform: scale(0.65);
+    opacity: 0;
+    transition: all 1.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 26px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.reveal-label {
+    text-align: center;
+    margin-top: 1.4rem;
+    font-size: 1.15rem;
+    color: #ddd;
+    text-shadow: 0 0 15px #8B0000;
+    letter-spacing: 0.08em;
+}
+
+@keyframes fadeInTag {
+    to { opacity: 0.85; }
+}
+        #logo-text {
+            font-size: clamp(3rem, 8vw, 7.5rem);
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #9d00ff, #00f0ff, #9d00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 
+                0 0 30px var(--accent-purple),
+                0 0 60px var(--accent-blue),
+                0 0 90px var(--accent-purple);
+            animation: glow-pulse 2s ease-in-out infinite alternate,
+                       glitch 3s infinite;
+        }
+
+        @keyframes glow-pulse {
+            from { filter: drop-shadow(0 0 20px var(--accent-purple)); }
+            to { filter: drop-shadow(0 0 60px var(--accent-blue)); }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(3px, -3px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .tagline {
+            margin-top: 1rem;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            letter-spacing: 0.3em;
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px var(--accent-blue);
+            animation: fadeIn 1.5s ease 0.5s forwards;
+            opacity: 0;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 15vh;
+            width: 320px;
+            max-width: 80vw;
+            height: 3px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            box-shadow: 0 0 20px var(--accent-purple);
+            transition: width 3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+canvas#particles {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Main Content */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(11, 15, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(157, 0, 255, 0.2);
+        }
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 0.1em;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px var(--accent-blue);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: transparent;
+            border: 2px solid var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-purple);
+            color: white;
+            box-shadow: 0 0 30px var(--accent-purple);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 0 40px var(--accent-blue);
+            transform: scale(1.05);
+        }
+/* ==================== MOBILE NAV + HAMBURGER (FIXED & WORKING) ==================== */
+
+/* Base hamburger (hidden on desktop) */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px;
+}
+
+.hamburger span {
+    width: 28px;
+    height: 3px;
+    background: #f0f0f5;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: rgba(11, 15, 20, 0.98);
+        flex-direction: column;
+        padding: 2rem 5vw;
+        gap: 2rem;
+        text-align: center;
+        z-index: 1000;
+        border-top: 1px solid rgba(157, 0, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    
+    .nav-links.active {
+        display: flex;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+
+    /* Turns ☰ into X when menu is open */
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+}
+        /* Hero */
+        #hero {
+            height: 100vh;
+            min-height: 700px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 30%, rgba(157, 0, 255, 0.15) 0%, transparent 70%),
+                        linear-gradient(180deg, #0b0f14 0%, #1a1f2e 100%);
+            z-index: -2;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 5vw;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            background: rgba(157, 0, 255, 0.1);
+            border: 1px solid var(--accent-purple);
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 1.5rem;
+            animation: badge-float 4s ease-in-out infinite;
+        }
+
+        .hero-headline {
+            font-size: clamp(3.5rem, 8vw, 7rem);
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -0.06em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            text-shadow: 
+                0 0 40px var(--accent-purple),
+                0 0 80px var(--accent-blue);
+        }
+
+        .hero-sub {
+            font-size: clamp(1.25rem, 3vw, 2rem);
+            max-width: 720px;
+            margin: 0 auto 3rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Sections */
+        section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 140px 5vw 100px;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            text-align: center;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* About */
+        #about {
+            background: linear-gradient(180deg, #12171f 0%, var(--bg) 100%);
+        }
+
+        .about-text {
+            max-width: 820px;
+            margin: 0 auto;
+            font-size: 1.25rem;
+            text-align: center;
+            opacity: 0.95;
+        }
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2.5rem;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 1px solid rgba(157, 0, 255, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-20px);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 50px rgba(157, 0, 255, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        /* ==================== ROADMAP — 100% DEVICE PROOF ==================== */
+/* ==================== ROADMAP — PERFECT ON ALL DEVICES ==================== */
+.roadmap-timeline {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 20px 40px;
+}
+
+.roadmap-timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    bottom: 40px;
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, #00f0ff, #6a00ff, transparent);
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* Desktop: alternating layout */
+.phase {
+    position: relative;
+    margin-bottom: 6rem;
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+    z-index: 2;
+}
+
+.phase:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.phase-dot {
+    width: 28px;
+    height: 28px;
+    background: #6a00ff;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 30px #6a00ff;
+    position: relative;
+    z-index: 3;
+    margin-top: 12px;
+}
+
+.phase-content {
+    flex: 1;
+    background: rgba(18, 23, 31, 0.97) !important;
+    backdrop-filter: blur(22px);
+    border: 1px solid rgba(157, 0, 255, 0.25);
+    border-radius: 24px;
+    padding: 2.2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    z-index: 2;
+}
+
+/* ==================== MOBILE FIX (720dp, 360px, tablets — NO MORE PROBLEMS) ==================== */
+@media (max-width: 768px) {
+    .roadmap-timeline::before {
+        left: 34px;           /* line now on the left */
+    }
+    
+    .phase {
+        flex-direction: row !important;   /* force single column style */
+        gap: 24px;
+    }
+    
+    .phase:nth-child(even) {
+        flex-direction: row !important;   /* disable alternation completely */
+    }
+    
+    .phase-dot {
+        margin-top: 10px;
+    }
+    
+    .phase-content {
+        padding: 1.8rem 1.4rem !important;
+        margin-left: 0;
+    }
+    
+    .phase-content h3 {
+        font-size: 1.35rem !important;
+    }
+}
+
+/* Extra safety for tiny screens */
+@media (max-width: 480px) {
+    .phase-content {
+        padding: 1.6rem 1.2rem !important;
+    }
+}
+
+/* Text always sharp over rings */
+.phase-content h3,
+.phase-content p,
+.phase-content li {
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 8px rgba(157, 0, 255, 0.3);
+}
+
+}
+
+/* Text clarity over glowing rings */
+.phase-content h3 {
+    color: #f0f0f5;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 8px rgba(157, 0, 255, 0.4);
+    margin-bottom: 1rem;
+}
+
+.phase-content ul, .phase-content p {
+    color: #e0e0e8;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.85);
+    line-height: 1.8;
+}
+
+/* ==================== MOBILE FIXES (720dp, 360px, everything) ==================== */
+@media (max-width: 768px) {
+    .roadmap-timeline::before {
+        left: 34px;
+    }
+    
+    .phase {
+        flex-direction: row !important;
+        gap: 20px;
+    }
+    
+    .phase-dot {
+        margin-top: 8px;
+    }
+    
+    .phase-content {
+        padding: 1.8rem 1.4rem !important;
+    }
+
+   .phase-content h3 {
+        font-size: 1.35rem !important;
+    }
+}
+
+/* Extra safety for very small screens */
+@media (max-width: 480px) {
+    .phase-content {
+        padding: 1.6rem 1.2rem !important;
+    }
+}
+
+        /* NFTs */
+        .nfts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+        }
+
+        .nft-card {
+            background: var(--card);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .nft-card:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 60px rgba(157, 0, 255, 0.4);
+        }
+
+        .nft-card img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .nft-card:hover img {
+            transform: scale(1.12);
+        }
+
+        .nft-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        /* FAQ */
+        .faq-item {
+            background: var(--card);
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .faq-question {
+            padding: 1.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .faq-answer {
+            padding: 0 2rem 1.75rem;
+            display: none;
+            line-height: 1.8;
+        }
+/* Whitepaper Modal */
+        #whitepaper-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 15, 20, 0.98);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            max-width: 860px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #12171f;
+            border-radius: 24px;
+            padding: 3rem;
+            border: 1px solid var(--accent-purple);
+        }
+
+        /* Footer */
+        footer {
+            background: #0a0d12;
+            padding: 5rem 5vw 3rem;
+            text-align: center;
+            border-top: 1px solid rgba(157, 0, 255, 0.15);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: var(--bg);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 2rem;
+                text-align: center;
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .phase {
+                flex-direction: column !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+
+    <!-- NAV -->
+    <header>
+        <nav>
+            <div class="logo">LUNAR HOWL</div>
+            
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#features">Utility</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
+                <li><a href="#nfts">The Pack</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button onclick="window.open('https://x.com/Lunar_Howl', '_blank')" class="btn btn-primary">X • @Lunar_Howl</button>
+            </div>
+
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+    <!-- === CINEMATIC HORROR PRELOADER === -->
+<div id="preloader">
+    <!-- Fog layer -->
+    <div class="fog"></div>
+    
+    <!-- Crimson particles -->
+    <canvas id="particles"></canvas>
+
+    <!-- Loading Phase -->
+    <div id="loading-phase">
+        <div id="logo-text">LUNAR HOWL</div>
+        <div class="tagline">THE FIRST HOWL ECHOES...</div>
+        
+        <div id="percent">00%</div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+    </div>
+
+    <!-- NFT Reveal Phase (after 10 seconds) -->
+    <div id="nft-reveal">
+        <div class="reveal-card">
+            <img src="https://picsum.photos/id/1015/800/800" alt="Lunar Howl #001">
+            <div class="reveal-label">LUNAR HOWL #001 • LEGENDARY</div>
+        </div>
+    </div>
+</div>
+<!-- === js background === -->
+<div id="portal-background">
+    <div class="rings-container">
+        <div class="ring outer"></div>
+        <div class="ring inner"></div>
+    </div>
+    <canvas id="spark-canvas"></canvas>
+</div>
+
+    <!-- HERO -->
+    <section id="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-badge">1111 SUPPLY • SOLANA</div>
+            <h1 class="hero-headline">
+                THEY WARNED YOU...<br>
+                DON’T WAKE THE LUNA
+            </h1>
+            <p class="hero-sub">
+                1111 divine wolf immortals. A vertically integrated ecosystem.<br>
+                Staking • Launchpad • Trading • 3D Realms • Casino
+            </p>
+            
+            <div style="display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap;">
+                <button onclick="document.getElementById('nfts').scrollIntoView({ behavior: 'smooth' })" 
+                        class="btn btn-secondary" style="padding:18px 48px; font-size:1.1rem;">
+                    ENTER THE PANTHEON
+                </button>
+                <button onclick="showWhitepaper()" 
+                        class="btn btn-primary" style="padding:18px 48px; font-size:1.1rem;">
+                    READ WHITEPAPER
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about">
+        <h2 class="section-title">The Legend</h2>
+        <div class="about-text">
+            <p>Before mortal empires and before stars found light, seven celestial forces shaped existence: Truth. Reason. Memory. Change. Courage. Mercy. Creation.</p>
+            <p style="margin-top:2rem;">When mortals sought godhood, divine harmony fractured. The celestial forces withdrew, fading into myth.</p>
+            <p style="margin-top:2rem;">But divinity does not die — it waits.</p>
+            <p style="margin-top:2rem;">Now, through blockchain technology, fragments of that divine energy return. Lunar Howl is the resurrection.</p>
+            <p style="margin-top:3rem; font-style:italic; opacity:0.8;">The Pack rises. The Pack reigns. The Pack howls.</p>
+        </div>
+    </section>
+
+    <!-- FEATURES / UTILITY -->
+    <section id="features" style="background:#12171f;">
+        <h2 class="section-title">The Ecosystem</h2>
+        <div class="features-grid">
+            <!-- Card 1 -->
+            <div class="feature-card">
+                <span class="feature-icon">🌕</span>
+                <h3 style="font-size:1.5rem;margin-bottom:0.8rem;">Lunar Vault — Staking</h3>
+                <p>Stake your Lunar Howl NFT to earn SOL. Ecosystem revenue flows back to loyal holders through structured reward pools.</p>
+            </div>
+            <!-- Card 2 -->
+            <div class="feature-card">
+                <span class="feature-icon">🚀</span>
+                <h3 style="font-size:1.5rem;margin-bottom:0.8rem;">Lunar Gate — Launchpad</h3>
+                <p>Exclusive access to curated launches. Early access, reduced fees, priority allocation. Only the Pack passes the Gate.</p>
+            </div>
+            <!-- Card 3 -->
+            <div class="feature-card">
+                <span class="feature-icon">🐺</span>
+                <h3 style="font-size:1.5rem;margin-bottom:0.8rem;">$HOWL Token</h3>
+                <p>Utility &amp; governance token. Powers staking multipliers, marketplace, game upgrades, and Temple Council voting.</p>
+            </div>
+            <!-- Card 4 -->
+            <div class="feature-card">
+                <span class="feature-icon">🎮</span>
+                <h3 style="font-size:1.5rem;margin-bottom:0.8rem;">Lunar Realms — 3D Universe</h3>
+                <p>Full immersive multiplayer 3D game. NFT characters, Realm Wars, on-chain rewards, and $HOWL economy.</p>
+            </div>
+            <!-- Card 5 -->
+            <div class="feature-card">
+                <span class="feature-icon">🎰</span>
+                <h3 style="font-size:1.5rem;margin-bottom:0.8rem;">Temple of the Moon</h3>
+                <p>Holder-only casino. Weekly free spins, SOL &amp; $HOWL jackpots, NFT-gated reward pools.</p>
+            </div>
+            <!-- Card 6 -->
+            <div class="feature-card">
+                <span class="feature-icon">🛡️</span>
+                <h3 style="font-size:1.5rem;margin-bottom:0.8rem;">Temple Council DAO</h3>
+                <p>NFT + $HOWL holders govern treasury, upgrades, partnerships, and game direction.</p>
+            </div>
+        </div>
+    </section>
+      <!-- ROADMAP -->
+    <section id="roadmap">
+        <h2 class="section-title">Roadmap</h2>
+        <div class="roadmap-timeline">
+
+            <!-- Phase 1 -->
+            <div class="phase">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <h3 style="color:#9d00ff; font-size:1.4rem;">Phase I — The Awakening</h3>
+                    <ul style="margin-top:1rem; line-height:2;">
+                        <li>Foundational lore release</li>
+                        <li>Official website launch</li>
+                        <li>Community formation &amp; early Pack onboarding</li>
+                        <li>Whitelist campaign for early believers</li>
+                    </ul>
+                    <p style="margin-top:2rem; opacity:0.7;">The moon rises. The Pack gathers.</p>
+                </div>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="phase">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <h3 style="color:#00f0ff; font-size:1.4rem;">Phase II — Genesis &amp; Ascension</h3>
+                    <ul style="margin-top:1rem; line-height:2;">
+                        <li>1,111 Lunar NFTs minted on Solana</li>
+                        <li>Rarity reveal ceremony</li>
+                        <li>Staking vault activation</li>
+                        <li>$HOWL token launch</li>
+                        <li>Lunar Realms beta &amp; Temple of the Moon activation</li>
+                    </ul>
+                    <p style="margin-top:2rem; opacity:0.7;">The first howl echoes.</p>
+                </div>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="phase">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <h3 style="color:#9d00ff; font-size:1.4rem;">Phase III — Lunar Howl Trading Hub</h3>
+                    <ul style="margin-top:1rem; line-height:2;">
+                        <li>Lunar Howl Trading Platform launch</li>
+                        <li>Telegram trading bot</li>
+                        <li>Advanced $HOWL utility</li>
+                    </ul>
+                    <p style="margin-top:2rem; opacity:0.7;">The Pack drives the market.</p>
+                </div>
+            </div>
+
+            <!-- Phase 4 -->
+            <div class="phase">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <h3 style="color:#00f0ff; font-size:1.4rem;">Phase IV — $HOWL Emergence</h3>
+                    <ul style="margin-top:1rem; line-height:2;">
+                        <li>$HOWL becomes primary community currency</li>
+                        <li>Staking &amp; ecosystem airdrops</li>
+                        <li>20% allocation to top Solana NFT communities</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Phase 5 -->
+            <div class="phase">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <h3 style="color:#9d00ff; font-size:1.4rem;">Phase V — Lunar Gate Launchpad</h3>
+                    <ul style="margin-top:1rem; line-height:2;">
+                        <li>Lunar Gate launchpad live</li>
+                        <li>Cross-chain partnerships</li>
+                        <li>Next-generation Lunar collection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Phase 6 -->
+            <div class="phase">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <h3 style="color:#00f0ff; font-size:1.4rem;">Phase VI — Lunar Realms 3D Universe</h3>
+                    <ul style="margin-top:1rem; line-height:2;">
+                        <li>Full 3D game launch</li>
+                        <li>Multiplayer &amp; quests</li>
+                        <li>Virtual land &amp; temples</li>
+                    </ul>
+                    <p style="margin-top:2rem; opacity:0.7;">The universe is alive. The Pack reigns supreme.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NFTS -->
+    <section id="nfts" style="background:#12171f;">
+        <h2 class="section-title">The Pack • 1,111 Wolves</h2>
+        <div class="nfts-grid">
+            <!-- NFT 1 -->
+            <div class="nft-card">
+                <img src="https://picsum.photos/id/1015/600/600" alt="Lunar Howl #001">
+                <div class="nft-info">
+                    <strong>#001 • Legendary</strong>
+                    <p style="margin-top:0.5rem; font-size:0.9rem; opacity:0.7;">Crimson Eclipse Howl</p>
+                </div>
+            </div>
+            <!-- NFT 2 -->
+            <div class="nft-card">
+                <img src="https://picsum.photos/id/1025/600/600" alt="Lunar Howl #042">
+                <div class="nft-info">
+                    <strong>#042 • Epic</strong>
+                    <p style="margin-top:0.5rem; font-size:0.9rem; opacity:0.7;">Neon Void Stalker</p>
+                </div>
+            </div>
+            <!-- NFT 3 -->
+            <div class="nft-card">
+                <img src="https://picsum.photos/id/1033/600/600" alt="Lunar Howl #137">
+                <div class="nft-info">
+                    <strong>#137 • Rare</strong>
+                    <p style="margin-top:0.5rem; font-size:0.9rem; opacity:0.7;">Silver Moon Guardian</p>
+                </div>
+            </div>
+            <!-- NFT 4 -->
+            <div class="nft-card">
+                <img src="https://picsum.photos/id/1040/600/600" alt="Lunar Howl #289">
+                <div class="nft-info">
+                    <strong>#289 • Legendary</strong>
+                    <p style="margin-top:0.5rem; font-size:0.9rem; opacity:0.7;">Cosmic Alpha Howl</p>
+                </div>
+            </div>
+            <!-- NFT 5 -->
+            <div class="nft-card">
+                <img src="https://picsum.photos/id/160/600/600" alt="Lunar Howl #421">
+                <div class="nft-info">
+                    <strong>#421 • Epic</strong>
+                    <p style="margin-top:0.5rem; font-size:0.9rem; opacity:0.7;">Electric Shadow Fang</p>
+                </div>
+            </div>
+            <!-- NFT 6 -->
+            <div class="nft-card">
+                <img src="https://picsum.photos/id/201/600/600" alt="Lunar Howl #666">
+                <div class="nft-info">
+                    <strong>#666 • Rare</strong>
+                    <p style="margin-top:0.5rem; font-size:0.9rem; opacity:0.7;">Midnight Celestial</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHITEPAPER TEASER + FAQ -->
+    <section id="faq">
+        <h2 class="section-title">Whitepaper &amp; FAQ</h2>
+        
+        <div style="max-width:720px;margin:0 auto 6rem;text-align:center;">
+            <button onclick="showWhitepaper()" 
+                    class="btn btn-secondary" style="padding:18px 60px; font-size:1.15rem;">
+                READ FULL WHITEPAPER
+            </button>
+            <p style="margin-top:1rem; opacity:0.6;">“From mortals to immortals — the rise of divine creation.”</p>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div style="max-width:820px; margin:0 auto;">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    What is Lunar Howl?
+                    <span style="font-size:1.8rem;">+</span>
+                </div>
+                <div class="faq-answer">
+                    1,111 divine wolf NFTs on Solana. Each NFT grants access to staking, launchpad, gaming, and governance in a fully integrated ecosystem.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    When is the mint?
+                    <span style="font-size:1.8rem;">+</span>
+                </div>
+                <div class="faq-answer">
+                    Mint date and price will be announced in Phase II. Whitelist spots are limited.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How does $HOWL work?
+                    <span style="font-size:1.8rem;">+</span>
+                </div>
+                <div class="faq-answer">
+                    $HOWL is the sacred energy token that powers staking multipliers, game upgrades, marketplace fees, and DAO voting.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    Is there a game?
+                    <span style="font-size:1.8rem;">+</span>
+                </div>
+                <div class="faq-answer">
+                    Yes — Lunar Realms is a full 3D multiplayer universe launching in Phase VI with NFT characters and $HOWL economy.
+                </div>
+            </div>
+        </div>
+    </section>
+     <!-- FOOTER -->
+    <footer>
+        <div style="max-width:1400px;margin:0 auto;">
+            <div style="display:flex;justify-content:center;gap:3rem;margin-bottom:3rem;flex-wrap:wrap;">
+                <a href="https://x.com/Lunar_Howl" target="_blank" style="color:var(--accent-blue);text-decoration:none;">𝕏</a>
+                <a href="#" style="color:var(--accent-blue);text-decoration:none;">DISCORD</a>
+                <a href="#" onclick="showWhitepaper()" style="color:var(--accent-blue);text-decoration:none;">WHITEPAPER</a>
+            </div>
+            <p style="opacity:0.4; font-size:0.85rem;">© 2026 LUNAR HOWL. ALL RIGHTS RESERVED.<br>THE PACK OWNS THE MOON.</p>
+        </div>
+    </footer>
+
+    <!-- WHITETPAPER MODAL -->
+    <div id="whitepaper-modal" onclick="if(event.target.id==='whitepaper-modal') hideWhitepaper()">
+        <div class="modal-content" onclick="event.stopImmediatePropagation()">
+            <button onclick="hideWhitepaper()" style="float:right;background:none;border:none;color:#9d00ff;font-size:2rem;cursor:pointer;">×</button>
+            <h2 style="text-align:center;margin-bottom:2rem;">LUNAR HOWL WHITEPAPER</h2>
+            <div style="font-size:1.05rem; line-height:1.85; text-align:justify;">
+                <p><strong>INTRODUCTION</strong><br>
+                In the light of Solana, divinity awakens. Lunar Howl are fragments of eternity forged in lunar energy.</p>
+                
+                <p><strong>PROJECT OVERVIEW</strong><br>
+                Name: Lunar Howl • Supply: 1,111 • Blockchain: Solana • Mint Price: TBA</p>
+                
+                <p><strong>THE LEGEND</strong><br>
+                Seven celestial forces shaped existence. Divinity does not die — it waits. Lunar Howl is the resurrection.</p>
+                
+                <p><strong>ECOSYSTEM</strong><br>
+                • Lunar Vault — Staking<br>
+                • Lunar Gate — Launchpad<br>
+                • $HOWL Token<br>
+                • Lunar Realms 3D Game<br>
+                • Temple of the Moon Casino</p>
+                
+                <p><strong>ECONOMIC MODEL</strong><br>
+                40% Staking &amp; Play-to-Earn • 25% Development • 20% Team (vested) • 10% Community • 5% Treasury</p>
+                
+                <p style="text-align:center;margin-top:3rem;font-style:italic;">The Pack decides its future.<br>The moon is only the beginning. 🌕</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle system for preloader
+        function createParticles() {
+            const canvas = document.getElementById('particles');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 0.8 - 0.4;
+                    this.speedY = Math.random() * 0.8 - 0.4;
+                    this.hue = Math.random() > 0.5 ? 270 : 190;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                }
+                draw() {
+                    ctx.fillStyle = `hsla(${this.hue}, 100%, 85%, 0.7)`;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = `hsl(${this.hue}, 100%, 85%)`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < 120; i++) {
+                particles.push(new Particle());
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(11, 15, 20, 0.12)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // Preloader logic
+        function startPreloader() {
+            const progressBar = document.getElementById('progress');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 18 + 7;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        const preloader = document.getElementById('preloader');
+                        preloader.style.opacity = '0';
+                        preloader.style.transform = 'scale(0.92)';
+                        
+                        setTimeout(() => {
+                            preloader.style.display = 'none';
+                            document.body.style.overflow = 'visible';
+                            
+                            // Trigger hero entrance
+                            const hero = document.getElementById('hero');
+                            hero.style.opacity = '0';
+                            setTimeout(() => {
+hero.style.transition = 'opacity 1.8s cubic-bezier(0.23,1,0.32,1)';
+                                hero.style.opacity = '1';
+                            }, 100);
+                        }, 1200);
+                    }, 800);
+                }
+            }, 45);
+        }
+        // Hamburger menu
+        function initMobileNav() {
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('nav-links');
+            
+            hamburger.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                const spans = hamburger.querySelectorAll('span');
+                if (navLinks.classList.contains('active')) {
+                    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+                    spans[1].style.opacity = '0';
+                    spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+                } else {
+                    spans[0].style.transform = 'none';
+                    spans[1].style.opacity = '1';
+                    spans[2].style.transform = 'none';
+                }
+            });
+        }
+
+        // FAQ toggle
+        function toggleFAQ(el) {
+            const answer = el.nextElementSibling;
+            const isOpen = answer.style.display === 'block';
+            
+            // Close all
+            document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+            
+            if (!isOpen) {
+                answer.style.display = 'block';
+            }
+        }
+
+        // Whitepaper modal
+        function showWhitepaper() {
+            document.getElementById('whitepaper-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideWhitepaper() {
+            const modal = document.getElementById('whitepaper-modal');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.style.opacity = '1';
+                document.body.style.overflow = 'visible';
+            }, 400);
+        }
+
+        // Keyboard escape for modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                const modal = document.getElementById('whitepaper-modal');
+                if (modal.style.display === 'flex') hideWhitepaper();
+            }
+        });
+
+        // Initialize everything
+        window.onload = function() {
+            createParticles();
+            startPreloader();
+            initMobileNav();
+            
+            // Prevent scroll during preloader
+            document.body.style.overflow = 'hidden';
+            
+            // Click anywhere on hero to scroll to about
+            document.getElementById('hero').addEventListener('click', (e) => {
+                if (e.target.tagName === 'SECTION') {
+                    document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        };
+    </script>
+</body>
+</html>
+<script>// ==================== HORROR PARTICLES ====================
+function createHorrorParticles() {
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+
+    let particles = [];
+    class Particle {
+        constructor() {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.size = Math.random() * 4.5 + 1.5;
+            this.speedX = Math.random() * 0.6 - 0.3;
+            this.speedY = Math.random() * 0.6 - 0.3;
+            this.hue = Math.random() > 0.5 ? 355 : 8;
+            this.alpha = Math.random() * 0.6 + 0.3;
+        }
+        update() {
+            this.x += this.speedX; this.y += this.speedY;
+            if (this.x < 0 || this.x > w) this.speedX *= -1;
+            if (this.y < 0 || this.y > h) this.speedY *= -1;
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.shadowBlur = 22;
+            ctx.shadowColor = `hsl(${this.hue}, 95%, 65%)`;
+            ctx.fillStyle = `hsl(${this.hue}, 100%, 62%)`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 140; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.fillStyle = 'rgba(10, 10, 10, 0.13)';
+        ctx.fillRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    });
+}
+
+// ==================== 5-SECOND CINEMATIC PRELOADER ====================
+function startCinematicPreloader() {
+    const progressBar = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const loadingPhase = document.getElementById('loading-phase');
+    const nftReveal = document.getElementById('nft-reveal');
+    const preloader = document.getElementById('preloader');
+
+    let progress = 0;
+    const duration = 5000; // exactly 5 seconds
+    const startTime = Date.now();
+
+    function updateLoader() {
+        const elapsed = Date.now() - startTime;
+        progress = Math.min((elapsed / duration) * 100, 100);
+
+        progressBar.style.width = `${progress}%`;
+        percentEl.textContent = `${Math.floor(progress)}%`;
+
+        if (progress < 100) {
+            requestAnimationFrame(updateLoader);
+        } else {
+            loadingPhase.style.opacity = '0';
+
+            setTimeout(() => {
+                nftReveal.style.display = 'flex';
+                nftReveal.style.opacity = '1';
+                const card = nftReveal.querySelector('.reveal-card');
+                card.style.transform = 'scale(1)';
+                card.style.opacity = '1';
+            }, 800);
+
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    document.body.style.overflow = 'visible';
+                }, 1600);
+            }, 1800);
+        }
+    }
+    updateLoader();
+}
+
+// Call both when page loads
+window.onload = () => {
+    createHorrorParticles();
+    startCinematicPreloader();
+    document.body.style.overflow = 'hidden';
+};
+/* === ADD THIS JAVASCRIPT INSIDE YOUR <script> TAG (at the bottom) === */
+
+function createPortalSparks() {
+    const canvas = document.getElementById('spark-canvas');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+
+    let particles = [];
+
+    class Spark {
+        constructor() { this.reset(); }
+        reset() {
+ const radius = Math.random() * 210 + 160; // spawn around rings
+            const angle = Math.random() * Math.PI * 2;
+            this.x = w / 2 + Math.cos(angle) * radius;
+            this.y = h / 2 + Math.sin(angle) * radius;
+            this.size = Math.random() * 3.2 + 1.1;
+            this.speed = Math.random() * 1.4 + 0.7;
+            this.angle = angle + (Math.random() - 0.5) * 1.2;
+            this.life = Math.random() * 95 + 75;
+            this.hue = 265 + Math.random() * 25;
+        }
+        update() {
+            this.angle += 0.022;
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+            this.life--;
+            this.size *= 0.982;
+            if (this.life <= 0 || this.size < 0.6) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.life / 140;
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = `hsl(${this.hue}, 100%, 78%)`;
+            ctx.fillStyle = `hsl(${this.hue}, 100%, 92%)`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 92; i++) particles.push(new Spark());
+
+    function animate() {
+        ctx.fillStyle = 'rgba(15, 0, 35, 0.085)'; // soft mist trail
+        ctx.fillRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    });
+}
+
+// Auto-start when page loads
+window.addEventListener('load', createPortalSparks);
+// ==================== HAMBURGER MENU (NOW WORKING) ====================
+function initHamburger() {
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (!hamburger || !navLinks) return;
+    
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+}
+
+// Run it safely
+document.addEventListener('DOMContentLoaded', initHamburger);
+</script>
